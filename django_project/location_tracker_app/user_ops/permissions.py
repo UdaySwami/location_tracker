@@ -19,5 +19,7 @@ class UserPermissions(BasePermission):
             return True
         if view.action == 'signup':
             return True
+        if request.user.role != UserRoles.Admin.value:
+            return False
 
         return True

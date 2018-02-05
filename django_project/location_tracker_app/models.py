@@ -62,6 +62,8 @@ class Location(models.Model):
     lng = models.FloatField()
     time = models.DateTimeField(default=timezone.now)
     next_location = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    is_first = models.BooleanField(default=False)
+
     # Relations
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 

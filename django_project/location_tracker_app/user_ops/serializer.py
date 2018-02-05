@@ -5,6 +5,8 @@ from rest_framework_jwt.settings import api_settings
 
 from ..models import *
 from ..validators import *
+from ..location_ops.serializer import LocationSerializer
+from ..utils import get_distance_covered
 
 logger = logging.getLogger('django')
 
@@ -65,3 +67,86 @@ class LoginRequestSerializer(serializers.Serializer):
         d = LoginRequestSerializer()
         d.__dict__.update(json_object)
         return d
+
+
+class ResponseUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'name', 'email')
+
+
+class UserTrackSerializer(serializers.Serializer):
+    date = serializers.SerializerMethodField()
+    locations = serializers.SerializerMethodField()
+    distance_covered = serializers.SerializerMethodField()
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
+    @staticmethod
+    def get_date(obj):
+        return obj.time.date()
+        # return ResponseUserSerializer(obj.user).data
+
+    @staticmethod
+    def get_locations(obj):
+        locations_travelled = [LocationSerializer(obj).data]
+        while obj.next_location:
+            obj = obj.next_location
+            locations_travelled.append(LocationSerializer(obj).data)
+        return locations_travelled
+
+    @staticmethod
+    def get_distance_covered(obj):
+        locations = [obj]
+        while obj.next_location:
+            obj = obj.next_location
+            locations.append(obj)
+        return get_distance_covered(locations)
+
+    class Meta:
+        fields = ('date', 'locations', 'distance_covered')
+
+
+class AllUserTrackSerializer(serializers.Serializer):
+    user = serializers.SerializerMethodField()
+    date = serializers.SerializerMethodField()
+    locations = serializers.SerializerMethodField()
+    distance_covered = serializers.SerializerMethodField()
+
+    def update(self, instance, validated_data):
+        pass
+
+    def create(self, validated_data):
+        pass
+
+    @staticmethod
+    def get_user(obj):
+        return ResponseUserSerializer(obj.user).data
+
+    @staticmethod
+    def get_date(obj):
+        return obj.time.date()
+        # return ResponseUserSerializer(obj.user).data
+
+    @staticmethod
+    def get_locations(obj):
+        locations_travelled = [LocationSerializer(obj).data]
+        while obj.next_location:
+            obj = obj.next_location
+            locations_travelled.append(LocationSerializer(obj).data)
+        return locations_travelled
+
+    @staticmethod
+    def get_distance_covered(obj):
+        locations = [obj]
+        while obj.next_location:
+            obj = obj.next_location
+            locations.append(obj)
+        return get_distance_covered(locations)
+
+    class Meta:
+        fields = ('user', 'date', 'locations', 'distance_covered')

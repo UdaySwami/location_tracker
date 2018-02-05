@@ -7,7 +7,8 @@ from django.db.models import FieldDoesNotExist
 from django.db.utils import IntegrityError
 from django.http import JsonResponse, Http404
 from rest_framework.views import exception_handler
-from rest_framework.exceptions import ValidationError as RValidationError, PermissionDenied, NotAuthenticated
+from rest_framework.exceptions import ValidationError as RValidationError, PermissionDenied,\
+    NotAuthenticated, AuthenticationFailed
 
 from .exceptions import *
 from .models import *
@@ -115,6 +116,10 @@ class Response:
         elif type(self.response_type) == NotAuthenticated:
             self.status_message = "%s" % self.response_type
             # raise self.response_type
+            self.status_code = 1115
+            self.status_type = "Failed"
+        elif type(self.response_type) == AuthenticationFailed:
+            self.status_message = "Token Expired: Please Login Again"
             self.status_code = 1115
             self.status_type = "Failed"
 

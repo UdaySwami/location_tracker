@@ -4,11 +4,10 @@ from rest_framework.decorators import list_route, detail_route
 from rest_framework.viewsets import ModelViewSet
 
 from .permissions import UserPermissions
-from .serializer import UserSerializer, LoginRequestSerializer
+from .serializer import UserSerializer, LoginRequestSerializer, UserTrackSerializer, AllUserTrackSerializer
 from ..exceptions import InvalidCredentials, InvalidAPIRequest
 from ..models import User, Location
 from ..response import Response
-from ..location_ops.serializer import LocationSerializer
 from ..utils import get_distance_covered
 
 
@@ -41,18 +40,27 @@ class UserViewSet(ModelViewSet):
             return Response(e).get_response()
 
     @detail_route(methods=['get'])
+    def tracks(self, request, *args, **kwargs):
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+        locations = Location.objects.filter(user=User.objects.get(id=self.kwargs['pk'])).filter(is_first=True)
+        if start_date:
+            locations = locations.filter(time__gte=start_date)
+        if end_date:
+            locations = locations.filter(time__lte=end_date)
+        data = UserTrackSerializer(locations, many=True).data
+        return Response().with_data(data)
+
+    @list_route(methods=['get'])
     def locations(self, request, *args, **kwargs):
         start_date = request.GET.get('start_date')
         end_date = request.GET.get('end_date')
-        locations = Location.objects.filter(user=User.objects.get(id=self.kwargs['pk']))
-        # print("start_date", start_date, end_date)
+        locations = Location.objects.filter().filter(is_first=True)
         if start_date:
-            locations = locations.filter(time__gt=start_date)
+            locations = locations.filter(time__gte=start_date)
         if end_date:
-            locations = locations.filter(time__lt=end_date)
-        distance = get_distance_covered(locations)
-        data = {'distance_covered': "%f KM" % distance,
-                'locations': LocationSerializer(locations, many=True).data}
+            locations = locations.filter(time__lte=end_date)
+        data = AllUserTrackSerializer(locations, many=True).data
         return Response().with_data(data)
 
     def retrieve(self, request, *args, **kwargs):

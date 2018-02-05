@@ -22,7 +22,7 @@ class LocationViewSet(ModelViewSet):
         serializer = self.serializer_class(data=request.data, context={'user': request.user}, many=True)
         serializer.is_valid(raise_exception=True)
         instance = serializer.save()
-        return Response().with_data(LocationSerializer(instance).data)
+        return Response().with_data(LocationSerializer(instance, many=True).data)
 
     def get_permissions(self):
         permissions = super().get_permissions()
