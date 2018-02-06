@@ -1,14 +1,13 @@
 import logging
 import traceback
-from json import JSONDecodeError
 
-from django.core.exceptions import ImproperlyConfigured, FieldError, ValidationError
+from django.core.exceptions import ImproperlyConfigured, ValidationError
 from django.db.models import FieldDoesNotExist
 from django.db.utils import IntegrityError
 from django.http import JsonResponse, Http404
-from rest_framework.views import exception_handler
-from rest_framework.exceptions import ValidationError as RValidationError, PermissionDenied,\
+from rest_framework.exceptions import ValidationError as RValidationError, PermissionDenied, \
     NotAuthenticated, AuthenticationFailed
+from rest_framework.views import exception_handler
 
 from .exceptions import *
 from .models import *
@@ -63,25 +62,21 @@ class Response:
             self.status_message = "%s" % self.response_type
             self.status_code = 1104
             self.status_type = "Failed"
-        elif type(self.response_type) == JSONDecodeError:
-            self.status_message = "Unknown error occurred (1106)"
-            self.status_code = 1105
-            self.status_type = "Failed"
         elif type(self.response_type) == User.DoesNotExist:
             self.status_message = "The user information does not exist in our system."
-            self.status_code = 1106
+            self.status_code = 1105
             self.status_type = "Failed"
         elif type(self.response_type) == IntegrityError:
             self.status_message = "%s" % self.response_type
-            self.status_code = 1107
+            self.status_code = 1106
             self.status_type = "Failed"
         elif type(self.response_type) == InvalidCredentials:
             self.status_message = "Invalid Username / Password provided. Please try again."
-            self.status_code = 1108
+            self.status_code = 1107
             self.status_type = "Failed"
         elif type(self.response_type) == KeyError:
             self.status_message = "Unknown error occurred (1117)"
-            self.status_code = 1109
+            self.status_code = 1108
             self.status_type = "Failed"
         elif type(self.response_type) == ValueError:
             self.status_message = "%s" % self.response_type
